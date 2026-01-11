@@ -5,7 +5,7 @@
 import { FEEDS } from '$lib/config/feeds';
 import type { NewsItem, NewsCategory } from '$lib/types';
 import { containsAlertKeyword, detectRegion, detectTopics } from '$lib/config/keywords';
-import { CORS_PROXY_URL, API_DELAYS, logger } from '$lib/config/api';
+import { fetchWithProxy, API_DELAYS, logger } from '$lib/config/api';
 
 /**
  * Simple hash function to generate unique IDs from URLs
@@ -107,11 +107,9 @@ export async function fetchCategoryNews(category: NewsCategory): Promise<NewsIte
 		// Build the raw GDELT URL with timespan=7d to get recent articles
 		const gdeltUrl = `https://api.gdeltproject.org/api/v2/doc/doc?query=${fullQuery}&timespan=7d&mode=artlist&maxrecords=20&format=json&sort=date`;
 
-		// Use proxy to avoid CORS - encode the whole URL once
-		const proxyUrl = CORS_PROXY_URL + encodeURIComponent(gdeltUrl);
-		logger.log('News API', `Fetching ${category} from:`, proxyUrl);
+		logger.log('News API', `Fetching ${category} from GDELT`);
 
-		const response = await fetch(proxyUrl);
+		const response = await fetchWithProxy(gdeltUrl);
 		if (!response.ok) {
 			throw new Error(`HTTP ${response.status}: ${response.statusText}`);
 		}

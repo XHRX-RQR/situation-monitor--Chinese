@@ -7,7 +7,7 @@
 
 import { INDICES, SECTORS, COMMODITIES, CRYPTO } from '$lib/config/markets';
 import type { MarketItem, SectorPerformance, CryptoItem } from '$lib/types';
-import { CORS_PROXY_URL, logger, FINNHUB_API_KEY, FINNHUB_BASE_URL } from '$lib/config/api';
+import { fetchWithProxy, logger, FINNHUB_API_KEY, FINNHUB_BASE_URL } from '$lib/config/api';
 
 interface CoinGeckoPrice {
 	usd: number;
@@ -96,11 +96,9 @@ export async function fetchCryptoPrices(): Promise<CryptoItem[]> {
 		const ids = CRYPTO.map((c) => c.id).join(',');
 		const coinGeckoUrl = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`;
 
-		// Use proxy to avoid CORS/rate limiting issues
-		const proxyUrl = CORS_PROXY_URL + encodeURIComponent(coinGeckoUrl);
-		logger.log('Markets API', 'Fetching crypto from:', proxyUrl);
+		logger.log('Markets API', 'Fetching crypto from CoinGecko');
 
-		const response = await fetch(proxyUrl);
+		const response = await fetchWithProxy(coinGeckoUrl);
 		if (!response.ok) {
 			throw new Error(`HTTP ${response.status}: ${response.statusText}`);
 		}

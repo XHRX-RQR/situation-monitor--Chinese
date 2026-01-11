@@ -22,10 +22,40 @@ export const FINNHUB_BASE_URL = 'https://finnhub.io/api/v1';
 const isDev = browser ? (import.meta.env?.DEV ?? false) : false;
 
 /**
- * CORS proxy URL for external API requests
- * Using corsproxy.io for both dev and production
+ * CORS proxy URLs for external API requests
+ * Primary: Custom Cloudflare Worker (faster, dedicated)
+ * Fallback: corsproxy.io (public, may rate limit)
  */
-export const CORS_PROXY_URL = 'https://corsproxy.io/?url=';
+export const CORS_PROXIES = {
+	primary: 'https://situation-monitor-proxy.seanthielen-e.workers.dev/?url=',
+	fallback: 'https://corsproxy.io/?url='
+} as const;
+
+// Default export for backward compatibility
+export const CORS_PROXY_URL = CORS_PROXIES.fallback;
+
+/**
+ * Fetch with CORS proxy fallback
+ * Tries primary proxy first, falls back to secondary on failure
+ */
+export async function fetchWithProxy(url: string): Promise<Response> {
+	const encodedUrl = encodeURIComponent(url);
+
+	// Try primary proxy first
+	try {
+		const response = await fetch(CORS_PROXIES.primary + encodedUrl);
+		if (response.ok) {
+			return response;
+		}
+		// If we get an error response, try fallback
+		logger.warn('API', `Primary proxy failed (${response.status}), trying fallback`);
+	} catch (error) {
+		logger.warn('API', 'Primary proxy error, trying fallback:', error);
+	}
+
+	// Fallback to secondary proxy
+	return fetch(CORS_PROXIES.fallback + encodedUrl);
+}
 
 /**
  * API request delays (ms) to avoid rate limiting
