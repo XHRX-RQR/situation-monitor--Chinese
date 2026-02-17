@@ -671,7 +671,7 @@ npm run format
 2. **克隆到本地**
 
 ```bash
-git clone https://github.com/your-username/situation-monitor-cn.git
+下载本仓库原代码
 cd situation-monitor-cn
 ```
 
@@ -804,25 +804,8 @@ SOFTWARE.
 ---
 
 ## 📞 联系方式
-
-- **问题反馈**: [GitHub Issues](https://github.com/your-username/situation-monitor-cn/issues)
-- **功能建议**: [GitHub Discussions](https://github.com/your-username/situation-monitor-cn/discussions)
-
 ---
-
-## 🗺️ 路线图
-
-### v2.1.0 (计划中)
-- [ ] 添加更多数据源
-- [ ] 增强移动端适配
-- [ ] 优化翻译性能
-- [ ] 添加数据导出功能
-
-### v2.2.0 (未来)
-- [ ] 用户自定义面板布局
-- [ ] 实时通知与告警
-- [ ] 多语言支持（英文、日文等）
-- [ ] 数据分析报告生成
+NO data
 
 ---
 
@@ -830,6 +813,6 @@ SOFTWARE.
 
 **如果这个项目对你有帮助，请给一个 ⭐️ Star！**
 
-Made with ❤️ by Situation Monitor Community
+Made with ❤️ by RenQirui 
 
 </div>
