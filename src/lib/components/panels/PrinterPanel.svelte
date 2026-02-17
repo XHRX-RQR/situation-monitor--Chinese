@@ -15,16 +15,16 @@
 	let { data = null, loading = false, error = null }: Props = $props();
 
 	const isExpanding = $derived(data && data.change > 0);
-	const status = $derived(isExpanding ? 'PRINTER ON' : 'PRINTER OFF');
+	const status = $derived(isExpanding ? '印钞机开启' : '印钞机关闭');
 	const statusClass = $derived(isExpanding ? 'critical' : 'monitoring');
 </script>
 
-<Panel id="printer" title="Money Printer" {status} {statusClass} {loading} {error}>
+<Panel id="printer" {status} {statusClass} {loading} {error}>
 	{#if !data && !loading && !error}
-		<div class="empty-state">No Fed data available</div>
+		<div class="empty-state">暂无美联储数据</div>
 	{:else if data}
 		<div class="printer-gauge">
-			<div class="printer-label">Federal Reserve Balance Sheet</div>
+			<div class="printer-label">美联储资产负债表</div>
 			<div class="printer-value">
 				{data.value.toFixed(2)}<span class="printer-unit">T USD</span>
 			</div>

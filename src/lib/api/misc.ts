@@ -3,11 +3,14 @@
  * Note: Some of these use mock data as the original APIs require authentication
  */
 
+import { translateText } from '$lib/services/translation';
+
 export interface Prediction {
 	id: string;
 	question: string;
 	yes: number;
 	volume: string;
+	translatedQuestion?: string;
 }
 
 export interface WhaleTransaction {
@@ -22,6 +25,7 @@ export interface Contract {
 	description: string;
 	vendor: string;
 	amount: number;
+	translatedDescription?: string;
 }
 
 export interface Layoff {
@@ -29,6 +33,7 @@ export interface Layoff {
 	count: number;
 	title: string;
 	date: string;
+	translatedTitle?: string;
 }
 
 /**
@@ -37,7 +42,7 @@ export interface Layoff {
  */
 export async function fetchPolymarket(): Promise<Prediction[]> {
 	// These represent active prediction markets on major events
-	return [
+	const predictions: Prediction[] = [
 		{
 			id: 'pm-1',
 			question: 'Will there be a US-China military incident in 2026?',
@@ -56,6 +61,20 @@ export async function fetchPolymarket(): Promise<Prediction[]> {
 			volume: '1.5M'
 		}
 	];
+
+	// 翻译所有问题
+	const translated = await Promise.all(
+		predictions.map(async (p) => {
+			try {
+				const translatedQuestion = await translateText(p.question);
+				return { ...p, translatedQuestion };
+			} catch {
+				return p;
+			}
+		})
+	);
+
+	return translated;
 }
 
 /**
@@ -79,7 +98,7 @@ export async function fetchWhaleTransactions(): Promise<WhaleTransaction[]> {
  */
 export async function fetchGovContracts(): Promise<Contract[]> {
 	// Sample government contract data
-	return [
+	const contracts: Contract[] = [
 		{
 			agency: 'DOD',
 			description: 'Advanced radar systems development and integration',
@@ -111,6 +130,20 @@ export async function fetchGovContracts(): Promise<Contract[]> {
 			amount: 275000000
 		}
 	];
+
+	// 翻译所有描述
+	const translated = await Promise.all(
+		contracts.map(async (c) => {
+			try {
+				const translatedDescription = await translateText(c.description);
+				return { ...c, translatedDescription };
+			} catch {
+				return c;
+			}
+		})
+	);
+
+	return translated;
 }
 
 /**
@@ -125,7 +158,7 @@ export async function fetchLayoffs(): Promise<Layoff[]> {
 		return d.toISOString();
 	};
 
-	return [
+	const layoffs: Layoff[] = [
 		{ company: 'Meta', count: 1200, title: 'Restructuring engineering teams', date: formatDate(2) },
 		{ company: 'Amazon', count: 850, title: 'AWS division optimization', date: formatDate(5) },
 		{
@@ -142,4 +175,18 @@ export async function fetchLayoffs(): Promise<Layoff[]> {
 		},
 		{ company: 'Snap', count: 500, title: 'Cost reduction initiative', date: formatDate(15) }
 	];
+
+	// 翻译所有标题
+	const translated = await Promise.all(
+		layoffs.map(async (l) => {
+			try {
+				const translatedTitle = await translateText(l.title);
+				return { ...l, translatedTitle };
+			} catch {
+				return l;
+			}
+		})
+	);
+
+	return translated;
 }

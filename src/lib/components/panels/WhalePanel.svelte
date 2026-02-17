@@ -29,9 +29,9 @@
 	}
 </script>
 
-<Panel id="whales" title="Whale Watch" {count} {loading} {error}>
+<Panel id="whales" {count} {loading} {error}>
 	{#if whales.length === 0 && !loading && !error}
-		<div class="empty-state">No whale transactions detected</div>
+		<div class="empty-state">暂无巨鲸交易</div>
 	{:else}
 		<div class="whale-list">
 			{#each whales as whale, i (whale.hash + i)}

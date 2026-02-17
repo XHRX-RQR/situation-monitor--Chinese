@@ -57,7 +57,7 @@
 	}
 </script>
 
-<Panel id="fed" title="Federal Reserve" count={newsState.items.length} {loading} {error}>
+<Panel id="fed" count={newsState.items.length} {loading} {error}>
 	<!-- Economic Indicators -->
 	{#if hasApiKey && indicatorList.length > 0}
 		<div class="indicators-section">
@@ -115,7 +115,7 @@
 	<!-- News Feed -->
 	<div class="news-section">
 		{#if newsState.items.length === 0 && !loading && !error}
-			<div class="empty-state">No Fed news available</div>
+			<div class="empty-state">暂无美联储新闻</div>
 		{:else}
 			<div class="fed-news-list">
 				{#each newsState.items as item (item.id)}
@@ -135,11 +135,15 @@
 							{/if}
 						</div>
 						<a href={item.link} target="_blank" rel="noopener noreferrer" class="fed-news-title">
-							{item.title}
+							{item.translatedTitle || item.title}
+							{#if item.translatedTitle}
+								<span class="translation-badge">🌐</span>
+							{/if}
 						</a>
 						{#if item.description}
+							{@const desc = item.translatedDescription || item.description}
 							<div class="fed-news-desc">
-								{item.description.slice(0, 120)}{item.description.length > 120 ? '...' : ''}
+								{desc.slice(0, 120)}{desc.length > 120 ? '...' : ''}
 							</div>
 						{/if}
 					</div>
@@ -385,6 +389,12 @@
 		font-size: 0.55rem;
 		color: var(--text-muted);
 		line-height: 1.4;
+	}
+
+	.translation-badge {
+		font-size: 0.55rem;
+		margin-left: 0.25rem;
+		opacity: 0.6;
 	}
 
 	.empty-state {

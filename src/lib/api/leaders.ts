@@ -5,6 +5,7 @@
 import { WORLD_LEADERS } from '$lib/config/leaders';
 import type { WorldLeader, LeaderNews } from '$lib/types';
 import { CORS_PROXY_URL, logger } from '$lib/config/api';
+import { translateText } from '$lib/services/translation';
 
 interface GdeltArticle {
 	title: string;
@@ -24,17 +25,23 @@ async function fetchLeaderNews(leader: WorldLeader): Promise<WorldLeader> {
 	// Build query from leader's keywords
 	const query = leader.keywords.map((k) => `"${k}"`).join(' OR ');
 
+	logger.log('Leaders API', `🔍 Fetching news for ${leader.name} with query: ${query}`);
+
 	try {
 		const gdeltUrl = `https://api.gdeltproject.org/api/v2/doc/doc?query=${query}&mode=artlist&maxrecords=5&format=json&sort=date`;
 		const proxyUrl = CORS_PROXY_URL + encodeURIComponent(gdeltUrl);
 
+		logger.log('Leaders API', `📡 Requesting: ${proxyUrl.substring(0, 150)}...`);
+
 		const response = await fetch(proxyUrl);
 		if (!response.ok) {
+			logger.error('Leaders API', `❌ HTTP ${response.status} for ${leader.name}`);
 			throw new Error(`HTTP ${response.status}`);
 		}
 
 		const contentType = response.headers.get('content-type');
 		if (!contentType?.includes('application/json')) {
+			logger.warn('Leaders API', `⚠️ Non-JSON response for ${leader.name}: ${contentType}`);
 			return { ...leader, news: [] };
 		}
 
@@ -43,8 +50,12 @@ async function fetchLeaderNews(leader: WorldLeader): Promise<WorldLeader> {
 		try {
 			data = JSON.parse(text);
 		} catch {
+			logger.error('Leaders API', `❌ JSON parse failed for ${leader.name}`);
 			return { ...leader, news: [] };
 		}
+
+		const articleCount = data.articles?.length || 0;
+		logger.log('Leaders API', `✅ Found ${articleCount} articles for ${leader.name}`);
 
 		const news: LeaderNews[] = (data.articles || []).map((article) => ({
 			source: article.domain || 'Unknown',
@@ -53,7 +64,28 @@ async function fetchLeaderNews(leader: WorldLeader): Promise<WorldLeader> {
 			pubDate: article.seendate || ''
 		}));
 
-		return { ...leader, news };
+		if (news.length > 0) {
+			logger.log('Leaders API', `🌐 Translating ${news.length} articles for ${leader.name}...`);
+		}
+
+		// 翻译所有新闻标题
+		const translatedNews = await Promise.all(
+			news.map(async (item) => {
+				try {
+					const translatedTitle = await translateText(item.title);
+					return { ...item, translatedTitle };
+				} catch (error) {
+					logger.error('Leaders API', 'Translation failed:', error);
+					return item;
+				}
+			})
+		);
+
+		if (translatedNews.length > 0) {
+			logger.log('Leaders API', `✅ Translation complete for ${leader.name}`);
+		}
+
+		return { ...leader, news: translatedNews };
 	} catch (error) {
 		logger.warn('Leaders API', `Error fetching news for ${leader.name}:`, error);
 		return { ...leader, news: [] };

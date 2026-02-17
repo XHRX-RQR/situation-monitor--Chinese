@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { NewsItem } from '$lib/types';
 	import { timeAgo } from '$lib/utils';
+	import { translationStore } from '$lib/stores/translation';
 
 	interface Props {
 		item: NewsItem;
@@ -17,6 +18,13 @@
 		showDescription = false,
 		compact = false
 	}: Props = $props();
+
+	// 自动使用翻译内容（如果有）
+	const displayTitle = $derived(item.translatedTitle || item.title);
+	const displayDescription = $derived(item.translatedDescription || item.description);
+	
+	// 是否显示原文
+	const hasTranslation = $derived(!!item.translatedTitle);
 </script>
 
 <div class="news-item" class:alert={showAlert && item.isAlert} class:compact>
@@ -24,17 +32,27 @@
 		<div class="item-source">
 			{item.source}
 			{#if showAlert && item.isAlert}
-				<span class="alert-tag">ALERT</span>
+				<span class="alert-tag">警报</span>
+			{/if}
+			{#if hasTranslation}
+				<span class="translation-badge" title="已自动翻译">🌐</span>
 			{/if}
 		</div>
 	{/if}
 
 	<a class="item-title" href={item.link} target="_blank" rel="noopener noreferrer">
-		{item.title}
+		{displayTitle}
 	</a>
 
-	{#if showDescription && item.description}
-		<p class="item-description">{item.description}</p>
+	{#if $translationStore.showOriginal && hasTranslation}
+		<div class="item-original">
+			<span class="original-label">原文:</span>
+			{item.title}
+		</div>
+	{/if}
+
+	{#if showDescription && displayDescription}
+		<p class="item-description">{displayDescription}</p>
 	{/if}
 
 	<div class="item-meta">
@@ -86,6 +104,32 @@
 		padding: 0.1rem 0.3rem;
 		border-radius: 2px;
 		font-weight: 600;
+	}
+
+	.translation-badge {
+		font-size: 0.7rem;
+		margin-left: auto;
+		opacity: 0.6;
+		transition: opacity 0.2s ease;
+	}
+
+	.translation-badge:hover {
+		opacity: 1;
+	}
+
+	.item-original {
+		font-size: 0.6rem;
+		color: var(--text-muted);
+		margin-top: 0.25rem;
+		padding: 0.3rem;
+		background: rgba(255, 255, 255, 0.02);
+		border-radius: 3px;
+		border-left: 2px solid var(--border);
+	}
+
+	.original-label {
+		font-weight: 600;
+		margin-right: 0.25rem;
 	}
 
 	.item-title {

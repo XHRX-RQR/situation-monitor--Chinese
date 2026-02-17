@@ -1,6 +1,8 @@
 <script lang="ts">
 	import Modal from './Modal.svelte';
 	import { settings } from '$lib/stores';
+	import { translationStore } from '$lib/stores/translation';
+	import { clearTranslationCache, getTranslationCacheSize } from '$lib/services/translation';
 	import { PANELS, type PanelId } from '$lib/config';
 
 	interface Props {
@@ -11,6 +13,20 @@
 
 	let { open = false, onClose, onReconfigure }: Props = $props();
 
+	let cacheSize = $state(0);
+
+	// 更新缓存大小
+	function updateCacheSize() {
+		cacheSize = getTranslationCacheSize();
+	}
+
+	// 当模态框打开时更新缓存大小
+	$effect(() => {
+		if (open) {
+			updateCacheSize();
+		}
+	});
+
 	function handleTogglePanel(panelId: PanelId) {
 		settings.togglePanel(panelId);
 	}
@@ -18,13 +34,18 @@
 	function handleResetPanels() {
 		settings.reset();
 	}
+
+	function handleClearTranslationCache() {
+		clearTranslationCache();
+		updateCacheSize();
+	}
 </script>
 
-<Modal {open} title="Settings" {onClose}>
+<Modal {open} title="设置" {onClose}>
 	<div class="settings-sections">
 		<section class="settings-section">
-			<h3 class="section-title">Enabled Panels</h3>
-			<p class="section-desc">Toggle panels on/off to customize your dashboard</p>
+			<h3 class="section-title">启用的面板</h3>
+			<p class="section-desc">切换面板开关来自定义你的仪表板</p>
 
 			<div class="panels-grid">
 				{#each Object.entries(PANELS) as [id, config]}
@@ -44,12 +65,35 @@
 		</section>
 
 		<section class="settings-section">
-			<h3 class="section-title">Dashboard</h3>
+			<h3 class="section-title">翻译设置</h3>
+			<p class="section-desc">所有新闻已自动翻译为中文，100% 覆盖</p>
+
+			<div class="translation-settings">
+				<label class="setting-toggle">
+					<input
+						type="checkbox"
+						checked={$translationStore.showOriginal}
+						onchange={() => translationStore.toggleShowOriginal()}
+					/>
+					<span class="toggle-label">同时显示原文</span>
+				</label>
+
+				<div class="cache-info">
+					<span class="cache-label">翻译缓存: {cacheSize} 条</span>
+					<button class="clear-cache-btn" onclick={handleClearTranslationCache}>
+						清除缓存
+					</button>
+				</div>
+			</div>
+		</section>
+
+		<section class="settings-section">
+			<h3 class="section-title">仪表板</h3>
 			{#if onReconfigure}
-				<button class="reconfigure-btn" onclick={onReconfigure}> Reconfigure Dashboard </button>
-				<p class="btn-hint">Choose a preset profile for your panels</p>
+				<button class="reconfigure-btn" onclick={onReconfigure}> 重新配置仪表板 </button>
+				<p class="btn-hint">选择一个预设配置模板</p>
 			{/if}
-			<button class="reset-btn" onclick={handleResetPanels}> Reset All Settings </button>
+			<button class="reset-btn" onclick={handleResetPanels}> 重置所有设置 </button>
 		</section>
 	</div>
 </Modal>
@@ -162,5 +206,72 @@
 
 	.reset-btn:hover {
 		background: rgba(255, 68, 68, 0.2);
+	}
+
+	.translation-settings {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.setting-toggle {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.4rem 0.6rem;
+		background: rgba(255, 255, 255, 0.02);
+		border: 1px solid var(--border);
+		border-radius: 4px;
+		cursor: pointer;
+		transition: all 0.15s ease;
+	}
+
+	.setting-toggle:hover {
+		background: rgba(255, 255, 255, 0.05);
+	}
+
+	.setting-toggle input:checked ~ .toggle-label {
+		color: var(--accent);
+	}
+
+	.setting-toggle input {
+		accent-color: var(--accent);
+	}
+
+	.toggle-label {
+		font-size: 0.65rem;
+		color: var(--text-primary);
+		transition: color 0.15s ease;
+	}
+
+	.cache-info {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.5rem;
+		background: rgba(255, 255, 255, 0.02);
+		border: 1px solid var(--border);
+		border-radius: 4px;
+		margin-top: 0.25rem;
+	}
+
+	.cache-label {
+		font-size: 0.6rem;
+		color: var(--text-secondary);
+	}
+
+	.clear-cache-btn {
+		padding: 0.3rem 0.6rem;
+		background: rgba(255, 165, 0, 0.1);
+		border: 1px solid rgba(255, 165, 0, 0.3);
+		border-radius: 4px;
+		color: var(--warning);
+		font-size: 0.6rem;
+		cursor: pointer;
+		transition: all 0.15s ease;
+	}
+
+	.clear-cache-btn:hover {
+		background: rgba(255, 165, 0, 0.2);
 	}
 </style>

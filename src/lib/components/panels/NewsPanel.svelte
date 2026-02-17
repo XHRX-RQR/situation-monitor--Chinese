@@ -7,7 +7,7 @@
 	interface Props {
 		category: NewsCategory;
 		panelId: PanelId;
-		title: string;
+		title?: string;
 	}
 
 	let { category, panelId, title }: Props = $props();

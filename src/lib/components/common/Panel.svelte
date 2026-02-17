@@ -1,10 +1,11 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { PanelId } from '$lib/config';
+	import { PANELS } from '$lib/config/panels';
 
 	interface Props {
 		id: PanelId;
-		title: string;
+		title?: string;
 		count?: number | string | null;
 		status?: string;
 		statusClass?: string;
@@ -36,6 +37,9 @@
 		children
 	}: Props = $props();
 
+	// 如果没有传入 title，从 PANELS 配置中获取
+	const displayTitle = $derived(title || PANELS[id]?.name || id);
+
 	function handleCollapse() {
 		if (collapsible && onCollapse) {
 			onCollapse();
@@ -46,7 +50,7 @@
 <div class="panel" class:draggable class:collapsed data-panel-id={id}>
 	<div class="panel-header">
 		<div class="panel-title-row">
-			<h3 class="panel-title">{title}</h3>
+			<h3 class="panel-title">{displayTitle}</h3>
 			{#if count !== null}
 				<span class="panel-count">{count}</span>
 			{/if}
@@ -67,7 +71,7 @@
 				{@render actions()}
 			{/if}
 			{#if collapsible}
-				<button class="panel-collapse-btn" onclick={handleCollapse} aria-label="Toggle panel">
+				<button class="panel-collapse-btn" onclick={handleCollapse} aria-label="切换面板">
 					{collapsed ? '▼' : '▲'}
 				</button>
 			{/if}
@@ -78,7 +82,7 @@
 		{#if error}
 			<div class="error-msg">{error}</div>
 		{:else if loading}
-			<div class="loading-msg">Loading...</div>
+			<div class="loading-msg">加载中...</div>
 		{:else}
 			{@render children()}
 		{/if}

@@ -22,6 +22,10 @@ export interface NewsItem {
 	alertKeyword?: string;
 	region?: string;
 	topics?: string[];
+	// 翻译相关
+	translatedTitle?: string;
+	translatedDescription?: string;
+	isTranslating?: boolean;
 }
 
 /**
@@ -308,6 +312,7 @@ export interface LeaderNews {
 	title: string;
 	link: string;
 	pubDate: string;
+	translatedTitle?: string;
 }
 
 /**

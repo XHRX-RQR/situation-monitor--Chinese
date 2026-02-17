@@ -575,7 +575,7 @@
 	});
 </script>
 
-<Panel id="map" title="Global Situation" {loading} {error}>
+<Panel id="map" {loading} {error}>
 	<div class="map-container" bind:this={mapContainer}>
 		<svg class="map-svg"></svg>
 		{#if tooltipVisible && tooltipContent}
@@ -590,19 +590,19 @@
 			</div>
 		{/if}
 		<div class="zoom-controls">
-			<button class="zoom-btn" onclick={zoomIn} title="Zoom in">+</button>
-			<button class="zoom-btn" onclick={zoomOut} title="Zoom out">−</button>
-			<button class="zoom-btn" onclick={resetZoom} title="Reset">⟲</button>
+			<button class="zoom-btn" onclick={zoomIn} title="放大">+</button>
+			<button class="zoom-btn" onclick={zoomOut} title="缩小">−</button>
+			<button class="zoom-btn" onclick={resetZoom} title="重置">⟲</button>
 		</div>
 		<div class="map-legend">
 			<div class="legend-item">
-				<span class="legend-dot high"></span> High
+				<span class="legend-dot high"></span> 高度
 			</div>
 			<div class="legend-item">
-				<span class="legend-dot elevated"></span> Elevated
+				<span class="legend-dot elevated"></span> 中等
 			</div>
 			<div class="legend-item">
-				<span class="legend-dot low"></span> Low
+				<span class="legend-dot low"></span> 低
 			</div>
 		</div>
 	</div>

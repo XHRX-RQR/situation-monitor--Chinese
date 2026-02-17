@@ -20,9 +20,9 @@
 	const count = $derived(layoffs.length);
 </script>
 
-<Panel id="layoffs" title="Layoffs Tracker" {count} {loading} {error}>
+<Panel id="layoffs" {count} {loading} {error}>
 	{#if layoffs.length === 0 && !loading && !error}
-		<div class="empty-state">No recent layoffs data</div>
+		<div class="empty-state">暂无裁员数据</div>
 	{:else}
 		<div class="layoffs-list">
 			{#each layoffs as layoff, i (layoff.company + i)}
@@ -36,7 +36,12 @@
 						</div>
 					{/if}
 					<div class="layoff-meta">
-						<span class="headline">{layoff.title}</span>
+						<span class="headline">
+							{layoff.translatedTitle || layoff.title}
+							{#if layoff.translatedTitle}
+								<span class="translation-badge">🌐</span>
+							{/if}
+						</span>
 						<span class="time">{timeAgo(layoff.date)}</span>
 					</div>
 				</div>
@@ -92,6 +97,12 @@
 		font-size: 0.55rem;
 		color: var(--text-muted);
 		white-space: nowrap;
+	}
+
+	.translation-badge {
+		font-size: 0.5rem;
+		margin-left: 0.25rem;
+		opacity: 0.6;
 	}
 
 	.empty-state {

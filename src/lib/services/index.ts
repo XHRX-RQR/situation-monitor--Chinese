@@ -48,3 +48,12 @@ export {
 	type ServiceClientOptions,
 	type HealthStatus
 } from './client';
+
+// Translation Service
+export {
+	translateText,
+	translateBatch,
+	clearTranslationCache,
+	getTranslationCacheSize,
+	preTranslateText
+} from './translation';

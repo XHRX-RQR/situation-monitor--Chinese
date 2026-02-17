@@ -27,14 +27,13 @@
 
 <Panel
 	id="commodities"
-	title="Commodities / VIX"
 	status={vixStatus}
 	statusClass={vixClass}
 	{loading}
 	{error}
 >
 	{#if items.length === 0 && !loading && !error}
-		<div class="empty-state">No commodity data available</div>
+		<div class="empty-state">暂无商品数据</div>
 	{:else}
 		<div class="commodities-list">
 			{#each items as item (item.symbol)}

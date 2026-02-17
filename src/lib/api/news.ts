@@ -6,6 +6,7 @@ import { FEEDS } from '$lib/config/feeds';
 import type { NewsItem, NewsCategory } from '$lib/types';
 import { containsAlertKeyword, detectRegion, detectTopics } from '$lib/config/keywords';
 import { fetchWithProxy, API_DELAYS, logger } from '$lib/config/api';
+import { translateText } from '$lib/services/translation';
 
 /**
  * Simple hash function to generate unique IDs from URLs
@@ -87,6 +88,59 @@ function transformGdeltArticle(
 }
 
 /**
+ * 翻译单条新闻
+ */
+async function translateNewsItem(item: NewsItem): Promise<NewsItem> {
+	try {
+		// 翻译标题
+		const translatedTitle = await translateText(item.title);
+		
+		// 如果有描述也翻译
+		let translatedDescription: string | undefined;
+		if (item.description) {
+			translatedDescription = await translateText(item.description);
+		}
+
+		return {
+			...item,
+			translatedTitle,
+			translatedDescription
+		};
+	} catch (error) {
+		logger.error('News API', 'Translation failed for item:', item.id, error);
+		// 翻译失败返回原文
+		return item;
+	}
+}
+
+/**
+ * 批量翻译新闻列表
+ */
+async function translateNewsItems(items: NewsItem[]): Promise<NewsItem[]> {
+	if (items.length === 0) return items;
+
+	logger.log('News API', `Auto-translating ${items.length} news items...`);
+
+	// 并发翻译，每次处理 5 条
+	const batchSize = 5;
+	const translated: NewsItem[] = [];
+
+	for (let i = 0; i < items.length; i += batchSize) {
+		const batch = items.slice(i, i + batchSize);
+		const batchResults = await Promise.all(batch.map(translateNewsItem));
+		translated.push(...batchResults);
+
+		// 每批次间隔稍微延迟，避免 API 限流
+		if (i + batchSize < items.length) {
+			await delay(200);
+		}
+	}
+
+	logger.log('News API', `Translation complete: ${translated.length} items`);
+	return translated;
+}
+
+/**
  * Fetch news for a specific category using GDELT via proxy
  */
 export async function fetchCategoryNews(category: NewsCategory): Promise<NewsItem[]> {
@@ -136,9 +190,13 @@ export async function fetchCategoryNews(category: NewsCategory): Promise<NewsIte
 		const categoryFeeds = FEEDS[category] || [];
 		const defaultSource = categoryFeeds[0]?.name || 'News';
 
-		return data.articles.map((article, index) =>
+		const newsItems = data.articles.map((article, index) =>
 			transformGdeltArticle(article, category, article.domain || defaultSource, index)
 		);
+
+		// 自动翻译所有新闻
+		const translatedItems = await translateNewsItems(newsItems);
+		return translatedItems;
 	} catch (error) {
 		logger.error('News API', `Error fetching ${category}:`, error);
 		return [];

@@ -28,15 +28,20 @@
 	}
 </script>
 
-<Panel id="polymarket" title="Polymarket" {count} {loading} {error}>
+<Panel id="polymarket" {count} {loading} {error}>
 	{#if predictions.length === 0 && !loading && !error}
-		<div class="empty-state">No predictions available</div>
+		<div class="empty-state">暂无预测数据</div>
 	{:else}
 		<div class="predictions-list">
 			{#each predictions as pred (pred.id)}
 				<div class="prediction-item">
 					<div class="prediction-info">
-						<div class="prediction-question">{pred.question}</div>
+						<div class="prediction-question">
+							{pred.translatedQuestion || pred.question}
+							{#if pred.translatedQuestion}
+								<span class="translation-badge">🌐</span>
+							{/if}
+						</div>
 						<div class="prediction-volume">Vol: {formatVolume(pred.volume)}</div>
 					</div>
 					<div class="prediction-odds">
@@ -92,6 +97,12 @@
 		font-weight: 700;
 		color: var(--success);
 		font-variant-numeric: tabular-nums;
+	}
+
+	.translation-badge {
+		font-size: 0.55rem;
+		margin-left: 0.25rem;
+		opacity: 0.6;
 	}
 
 	.empty-state {

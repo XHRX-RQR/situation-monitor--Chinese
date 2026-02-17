@@ -42,12 +42,12 @@
 			.filter((k) => k.length > 0);
 
 		if (!trimmedName) {
-			error = 'Name is required';
+			error = '名称为必填项';
 			return;
 		}
-
+		
 		if (keywordList.length === 0) {
-			error = 'At least one keyword is required';
+			error = '至少需要一个关键词';
 			return;
 		}
 
@@ -67,7 +67,7 @@
 			});
 
 			if (!result) {
-				error = 'Maximum number of monitors reached (20)';
+				error = '已达到监控数量上限 (20)';
 				return;
 			}
 		}
@@ -83,48 +83,48 @@
 	}
 </script>
 
-<Modal {open} title={editMonitor ? 'Edit Monitor' : 'Create Monitor'} {onClose}>
+<Modal {open} title={editMonitor ? '编辑监控' : '创建监控'} {onClose}>
 	<form class="monitor-form" onsubmit={handleSubmit}>
 		{#if error}
 			<div class="form-error">{error}</div>
 		{/if}
 
 		<div class="form-group">
-			<label for="monitor-name">Name</label>
+			<label for="monitor-name">名称</label>
 			<input
 				id="monitor-name"
 				type="text"
 				bind:value={name}
-				placeholder="e.g., Ukraine Crisis"
+				placeholder="例如，乌克兰危机"
 				maxlength="50"
 			/>
 		</div>
 
 		<div class="form-group">
-			<label for="monitor-keywords">Keywords (comma separated)</label>
+			<label for="monitor-keywords">关键词（逗号分隔）</label>
 			<input
 				id="monitor-keywords"
 				type="text"
 				bind:value={keywords}
-				placeholder="e.g., ukraine, zelensky, kyiv"
+				placeholder="例如，乌克兰，泽连斯基，基辅"
 			/>
-			<p class="form-hint">News matching any of these keywords will appear in your monitor</p>
+			<p class="form-hint">匹配任何这些关键词的新闻将出现在你的监控中</p>
 		</div>
 
 		<div class="form-group">
 			<label class="checkbox-label">
 				<input type="checkbox" bind:checked={enabled} />
-				<span>Enabled</span>
+				<span>启用</span>
 			</label>
 		</div>
 
 		<div class="form-actions">
 			{#if editMonitor}
-				<button type="button" class="delete-btn" onclick={handleDelete}> Delete </button>
+				<button type="button" class="delete-btn" onclick={handleDelete}> 删除 </button>
 			{/if}
-			<button type="button" class="cancel-btn" onclick={onClose}> Cancel </button>
+			<button type="button" class="cancel-btn" onclick={onClose}> 取消 </button>
 			<button type="submit" class="submit-btn">
-				{editMonitor ? 'Save Changes' : 'Create Monitor'}
+				{editMonitor ? '保存修改' : '创建监控'}
 			</button>
 		</div>
 	</form>

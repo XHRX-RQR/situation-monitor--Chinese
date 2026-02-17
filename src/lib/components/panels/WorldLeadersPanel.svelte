@@ -19,9 +19,9 @@
 	}
 </script>
 
-<Panel id="leaders" title="World Leaders" {count} {loading} {error}>
+<Panel id="leaders" {count} {loading} {error}>
 	{#if leaders.length === 0 && !loading && !error}
-		<div class="empty-state">No leaders data available</div>
+		<div class="empty-state">暂无领袖数据</div>
 	{:else}
 		<div class="leaders-grid">
 			{#each leaders as leader (leader.id)}
@@ -54,11 +54,17 @@
 					{#if latestNews.length > 0}
 						<div class="leader-news">
 							{#each latestNews as news}
-								<a href={news.link} target="_blank" class="leader-news-item" title={news.title}>
-									{news.title.length > 60 ? news.title.substring(0, 60) + '...' : news.title}
+								{@const displayTitle = news.translatedTitle || news.title}
+								<a href={news.link} target="_blank" class="leader-news-item" title={displayTitle}>
+									{displayTitle.length > 60 ? displayTitle.substring(0, 60) + '...' : displayTitle}
+									{#if news.translatedTitle}
+										<span class="translation-badge">🌐</span>
+									{/if}
 								</a>
 							{/each}
 						</div>
+					{:else if !loading}
+						<div class="no-news">暂无相关新闻</div>
 					{/if}
 				</div>
 			{/each}
@@ -201,6 +207,22 @@
 
 	.leader-news-item:hover {
 		color: var(--text-primary);
+	}
+
+	.translation-badge {
+		font-size: 0.55rem;
+		margin-left: 0.25rem;
+		opacity: 0.6;
+	}
+
+	.no-news {
+		margin-top: 0.5rem;
+		padding: 0.5rem;
+		text-align: center;
+		font-size: 0.55rem;
+		color: var(--text-muted);
+		background: rgba(255, 255, 255, 0.02);
+		border-radius: 3px;
 	}
 
 	.empty-state {

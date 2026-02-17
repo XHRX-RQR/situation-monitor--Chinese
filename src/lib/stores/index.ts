@@ -77,3 +77,6 @@ export {
 	type FedIndicatorsState,
 	type FedNewsState
 } from './fed';
+
+// Translation store
+export { translationStore, type TranslationSettings } from './translation';

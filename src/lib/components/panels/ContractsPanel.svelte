@@ -26,18 +26,20 @@
 	}
 </script>
 
-<Panel id="contracts" title="Gov Contracts" {count} {loading} {error}>
+<Panel id="contracts" {count} {loading} {error}>
 	{#if contracts.length === 0 && !loading && !error}
-		<div class="empty-state">No contracts available</div>
+		<div class="empty-state">暂无合同数据</div>
 	{:else}
 		<div class="contracts-list">
 			{#each contracts as contract, i (contract.vendor + i)}
+				{@const desc = contract.translatedDescription || contract.description}
 				<div class="contract-item">
 					<div class="contract-agency">{contract.agency}</div>
 					<div class="contract-desc">
-						{contract.description.length > 100
-							? contract.description.substring(0, 100) + '...'
-							: contract.description}
+						{desc.length > 100 ? desc.substring(0, 100) + '...' : desc}
+						{#if contract.translatedDescription}
+							<span class="translation-badge">🌐</span>
+						{/if}
 					</div>
 					<div class="contract-meta">
 						<span class="contract-vendor">{contract.vendor}</span>
@@ -96,6 +98,12 @@
 		font-weight: 600;
 		color: var(--success);
 		font-variant-numeric: tabular-nums;
+	}
+
+	.translation-badge {
+		font-size: 0.55rem;
+		margin-left: 0.25rem;
+		opacity: 0.6;
 	}
 
 	.empty-state {

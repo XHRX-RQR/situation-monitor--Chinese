@@ -6,6 +6,7 @@
  */
 
 import { FRED_API_KEY, FRED_BASE_URL, logger, fetchWithProxy } from '$lib/config/api';
+import { translateText } from '$lib/services/translation';
 
 export interface FredObservation {
 	date: string;
@@ -244,6 +245,8 @@ export interface FedNewsItem {
 	typeLabel: string;
 	isPowellRelated: boolean;
 	hasVideo: boolean;
+	translatedTitle?: string;
+	translatedDescription?: string;
 }
 
 /**
@@ -357,11 +360,29 @@ export async function fetchFedNews(): Promise<FedNewsItem[]> {
 	}
 
 	// Sort by timestamp (newest first), with Powell items boosted
-	return allItems.sort((a, b) => {
+	const sorted = allItems.sort((a, b) => {
 		// Powell items get priority
 		if (a.isPowellRelated && !b.isPowellRelated) return -1;
 		if (!a.isPowellRelated && b.isPowellRelated) return 1;
 		// Then by timestamp
 		return b.timestamp - a.timestamp;
 	});
+
+	// 翻译所有新闻
+	const translated = await Promise.all(
+		sorted.map(async (item) => {
+			try {
+				const translatedTitle = await translateText(item.title);
+				const translatedDescription = item.description
+					? await translateText(item.description)
+					: '';
+				return { ...item, translatedTitle, translatedDescription };
+			} catch (error) {
+				logger.error('Fed RSS', 'Translation failed:', error);
+				return item;
+			}
+		})
+	);
+
+	return translated;
 }
